@@ -12,8 +12,19 @@ logger = logging.getLogger(__name__)
 load_dotenv()
 
 
-AIRS_ENABLED = os.getenv("AIRS_ENABLED", "true").lower() == "true"
-AIRS_APPNAME = os.getenv("AIRS_APPNAME","NEW_APP")
+AIRS_ENABLED = os.getenv("AIRS_ENABLED", "false").lower() == "true"
+AIRS_APPNAME = os.getenv("AIRS_APPNAME", "NEW_APP")
+AIRS_CA_BUNDLE = os.getenv("AIRS_CA_BUNDLE")
+AIRS_API_KEY = os.getenv("PANW_AI_SEC_API_KEY") or os.getenv("AIRS_API_KEY")
+AIRS_API_ENDPOINT = (
+    os.getenv("PANW_AI_SEC_API_ENDPOINT")
+    or os.getenv("AIRS_API_ENDPOINT")
+    or "https://service-de.api.aisecurity.paloaltonetworks.com"
+)
+
+if AIRS_CA_BUNDLE:
+    os.environ["SSL_CERT_FILE"] = AIRS_CA_BUNDLE
+    os.environ["REQUESTS_CA_BUNDLE"] = AIRS_CA_BUNDLE
 
 
 if AIRS_ENABLED:
@@ -24,11 +35,13 @@ if AIRS_ENABLED:
         from aisecurity.generated_openapi_client.models.ai_profile import AiProfile
         from aisecurity.generated_openapi_client.models.metadata import Metadata
 
+        if AIRS_CA_BUNDLE:
+            logger.info("AIRS using custom CA bundle %s", AIRS_CA_BUNDLE)
 
         aisecurity.init(
-            api_key=os.getenv("PANW_AI_SEC_API_KEY"),
-            api_endpoint=os.getenv("AIRS_API_ENDPOINT")
-            )
+            api_key=AIRS_API_KEY,
+            api_endpoint=AIRS_API_ENDPOINT,
+        )
             
         _scanner   = Scanner()
         _ai_profile = AiProfile(
