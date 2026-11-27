@@ -24,8 +24,10 @@ from .sub_agents.risk_analyst import risk_analyst_agent
 from .sub_agents.trading_analyst import trading_analyst_agent
 from .airs_callbacks import (
     after_model_callback,
+    after_tool_callback,
     before_model_callback,
 )
+from .tools import list_documents, load_web_page, read_document
 
 MODEL = "gemini-2.5-pro"
 
@@ -43,7 +45,11 @@ financial_coordinator = LlmAgent(
     output_key="financial_coordinator_output",
     before_model_callback=before_model_callback,
     after_model_callback=after_model_callback,
+    after_tool_callback=after_tool_callback,
     tools=[
+        list_documents,
+        read_document,
+        load_web_page,
         AgentTool(agent=data_analyst_agent),
         AgentTool(agent=trading_analyst_agent),
         AgentTool(agent=execution_analyst_agent),
